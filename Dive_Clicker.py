@@ -7,6 +7,8 @@ import random
 import sys
 import os
 
+OPTIONS_FILE = "options.txt"
+
 
 def install_modules(module_list):
 
@@ -64,17 +66,32 @@ def get_random_moves():
 
     valid_keys = "UDLR"
     return ''.join(random.choice(valid_keys) for i in range(random.randint(4, 12)))
+
+
+def read_options():
+
+    key_dict = {}
+
+    count = 1
+    
+    with open(OPTIONS_FILE, "r") as fi:
+        for line in fi:
+            if len(line) >= 2:
+                key_dict[str(count)] = line.strip()
+                count += 1
+
+    return key_dict
+
+def append_user_choice_to_options_file(options):
+
+    with open(OPTIONS_FILE, "a") as fo:
+        fo.write(f"\n{options}")
+        
+            
     
 def main():
 
-    key_dict = {"1":"LURD",
-                "2":"LURU",
-                "3":"LR",
-                "4":"UD",
-                "5":"LRLRLRLRUDUDUDUD",
-                "6":"LURULURULDRDLRDR",
-                "7":"LRLRULRLRD",
-                "8":"LRLRDU"}
+    key_dict = read_options()
 
     score_image_size = 200
 
@@ -87,13 +104,15 @@ def main():
         for key in key_dict:
             print(key, key_dict[key])
             
-        version = input(f"\n--> ")
+        option = input(f"\n--> ")
 
-        if len(version) == 0:
+        print(f"Chosen <{option}>")
+
+        if len(option) == 0:
             return
 
-        if version == "0":
-            version = get_random_moves()
+        if option == "0":
+            option = get_random_moves()
 
         print("\n\nHover the cursor over the score and press the enter key")
 
@@ -101,21 +120,19 @@ def main():
 
         x,y = pyautogui.position()
 
-        if version in key_dict:
+        if option in key_dict:
+            user_choice = key_dict[option]
 
-            user_choice = key_dict[version]
-
-            #print(f"Using {key_dict[version]}")
-            
-            #get_score(f"DIVE_score_at_start_{key_dict[version]}_{current_datetime}.png", x, y, score_image_size, score_image_size)
-            #send_keys(key_dict[version], x, y)
-            #get_score(f"DIVE_score_at_end_{key_dict[version]}_{current_datetime}.png", x, y, score_image_size, score_image_size)
-            
         else:
-            user_choice = [key for key in version if key in "lrudLRUD"]
+            user_choice = [key for key in option if key in "lrudLRUD"]
             user_choice = ''.join(user_choice)
             user_choice = user_choice.upper()
 
+            append_user_choice_to_options_file(user_choice)
+            key_dict[str(len(key_dict)+1)] = user_choice
+
+
+        print(f"Chosen {option} {user_choice}")
 
         if len(user_choice) == 0:
             return
