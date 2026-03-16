@@ -9,6 +9,21 @@ import os
 
 OPTIONS_FILE = "options.txt"
 
+def copyright_message():
+    print("""DIVE_Clicker.py  Copyright 2026  Gary Quinn
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+along with this program.  If not, see <https://www.gnu.org/licenses/>.""")
+
 
 def install_modules(module_list):
 
@@ -149,9 +164,11 @@ if __name__ == "__main__":
     install_modules(["pyautogui"])
 
     import pyautogui
+
+    copyright_message()
     
     main()
 
-    print("\n\nBBFN\n\n")
+    print("\n\nBye Bye For Now :-)\n\n")
 
     
