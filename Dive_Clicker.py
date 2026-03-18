@@ -9,6 +9,9 @@ import os
 
 OPTIONS_FILE = "options.txt"
 
+SCORE_IMAGE_SIZE = 200
+
+    
 def copyright_message():
     print("""DIVE_Clicker.py  Copyright 2026  Gary Quinn
 
@@ -103,60 +106,91 @@ def append_user_choice_to_options_file(options):
         fo.write(f"\n{options}")
         
             
+
+def process_user_input(key_dict, option, x, y):
+
+    if option in key_dict:
+        user_choice = key_dict[option]
+
+    else:
+        user_choice = [key for key in option if key in "lrudLRUD"]
+        user_choice = ''.join(user_choice)
+        user_choice = user_choice.upper()
+
+        append_user_choice_to_options_file(user_choice)
+        key_dict[str(len(key_dict)+1)] = user_choice
+
+
+    print(f"Chosen {option} {user_choice}")
+
+    if len(user_choice) == 0:
+        return False
+
+    print(f"Using {user_choice}")
+
+    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+    print(f"Current date & time : {current_datetime}\n\n")
     
+    get_score(f"DIVE_{current_datetime}_score_at_start_{user_choice}.png", x, y, SCORE_IMAGE_SIZE, SCORE_IMAGE_SIZE)
+    send_keys(user_choice, x, y) # Send the user's choice
+    get_score(f"DIVE_{current_datetime}_score_at_end_{user_choice}.png", x, y, SCORE_IMAGE_SIZE, SCORE_IMAGE_SIZE)
+
+    return True
+
+
+def get_user_input(key_dict):
+
+    repeat_count = 1
+
+    print("ENTER: Exit\n0: Random\nSelection of LRUD: use those, OR...")
+    for key in key_dict:
+        print(key, key_dict[key])
+        
+    option = input(f"\n--> ")
+
+    print(f"Chosen <{option}>")
+
+    if len(option) == 0:
+        return False, False, False, 0
+
+    command = option.split(".")[0]
+
+    try:
+        count = option.split(".")[1]
+        repeat_count = int(count)
+
+        print(command, count, repeat_count)
+
+    except:
+        repeat_count = 1
+
+    if command == "0":
+        command = get_random_moves()
+
+    print("\n\nHover the cursor over the score and press the enter key")
+
+    input()
+
+    x,y = pyautogui.position()
+
+    return command, x, y, repeat_count
+
+
 def main():
 
     key_dict = read_options()
 
-    score_image_size = 200
+    run_again = True
+    while run_again:
 
-    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-    print(f"Current date & time : {current_datetime}\n\n")
+        option, x, y, repeat_count = get_user_input(key_dict)
 
-    while True:
-
-        print("ENTER: Exit\n0: Random\nSelection of LRUD: use those, OR...")
-        for key in key_dict:
-            print(key, key_dict[key])
-            
-        option = input(f"\n--> ")
-
-        print(f"Chosen <{option}>")
-
-        if len(option) == 0:
+        if repeat_count == 0:
             return
 
-        if option == "0":
-            option = get_random_moves()
+        for _ in range(repeat_count):
+            run_again = process_user_input(key_dict, option, x, y)
 
-        print("\n\nHover the cursor over the score and press the enter key")
-
-        input()
-
-        x,y = pyautogui.position()
-
-        if option in key_dict:
-            user_choice = key_dict[option]
-
-        else:
-            user_choice = [key for key in option if key in "lrudLRUD"]
-            user_choice = ''.join(user_choice)
-            user_choice = user_choice.upper()
-
-            append_user_choice_to_options_file(user_choice)
-            key_dict[str(len(key_dict)+1)] = user_choice
-
-
-        print(f"Chosen {option} {user_choice}")
-
-        if len(user_choice) == 0:
-            return
-
-        print(f"Using {user_choice}")
-         
-        get_score(f"DIVE_{current_datetime}_score_at_start_{user_choice}.png", x, y, score_image_size, score_image_size)
-        send_keys(user_choice, x, y) # Send the user's choice
-        get_score(f"DIVE_{current_datetime}_score_at_end_{user_choice}.png", x, y, score_image_size, score_image_size)
 
 
 if __name__ == "__main__":
