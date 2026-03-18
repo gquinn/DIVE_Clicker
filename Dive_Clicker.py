@@ -51,10 +51,10 @@ def get_score(filename, x, y, xsize, ysize):
 
 def send_keys(keys, score_x, score_y):
 
-    arrow_key_dict = {"L":"left",
-                      "U":"up",
-                      "R":"right",
-                      "D":"down"}
+    arrow_key_dict = {"W":"up",
+                      "A":"left",
+                      "D":"right",
+                      "S":"down"}
 
     no_change_count = 0
     start_colour = pyautogui.screenshot().getpixel((score_x, score_y))
@@ -82,7 +82,7 @@ def send_keys(keys, score_x, score_y):
 
 def get_random_moves():
 
-    valid_keys = "UDLR"
+    valid_keys = "WASD"
     return ''.join(random.choice(valid_keys) for i in range(random.randint(4, 12)))
 
 
@@ -102,10 +102,10 @@ def read_options():
 
 def append_user_choice_to_options_file(options):
 
-    with open(OPTIONS_FILE, "a") as fo:
-        fo.write(f"\n{options}")
-        
-            
+    if len(options) > 0:
+        with open(OPTIONS_FILE, "a") as fo:
+            fo.write(f"\n{options}")
+                    
 
 def process_user_input(key_dict, option, x, y):
 
@@ -113,7 +113,7 @@ def process_user_input(key_dict, option, x, y):
         user_choice = key_dict[option]
 
     else:
-        user_choice = [key for key in option if key in "lrudLRUD"]
+        user_choice = [key for key in option if key in "wasdWASD"]
         user_choice = ''.join(user_choice)
         user_choice = user_choice.upper()
 
@@ -124,6 +124,7 @@ def process_user_input(key_dict, option, x, y):
     print(f"Chosen {option} {user_choice}")
 
     if len(user_choice) == 0:
+        print("Nothing to do.\n")
         return False
 
     print(f"Using {user_choice}")
@@ -151,6 +152,7 @@ def get_user_input(key_dict):
     print(f"Chosen <{option}>")
 
     if len(option) == 0:
+        print("Nothing to do.\n")
         return False, False, False, 0
 
     command = option.split(".")[0]
@@ -188,8 +190,11 @@ def main():
         if repeat_count == 0:
             return
 
-        for _ in range(repeat_count):
+        for i in range(repeat_count):
+            print(f"\n\nRun {i+1} of {repeat_count}")
             run_again = process_user_input(key_dict, option, x, y)
+            if not run_again:
+                return
 
 
 
