@@ -100,6 +100,7 @@ def read_options():
 
     return key_dict
 
+
 def append_user_choice_to_options_file(options):
 
     if len(options) > 0:
@@ -117,8 +118,9 @@ def process_user_input(key_dict, option, x, y):
         user_choice = ''.join(user_choice)
         user_choice = user_choice.upper()
 
-        append_user_choice_to_options_file(user_choice)
-        key_dict[str(len(key_dict)+1)] = user_choice
+        if user_choice not in key_dict.values():
+            append_user_choice_to_options_file(user_choice)
+            key_dict[str(len(key_dict)+1)] = user_choice
 
 
     print(f"Chosen {option} {user_choice}")
