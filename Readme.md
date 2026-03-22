@@ -31,3 +31,5 @@ ToDo:
 
 Refactor function and variable names.   They're a mess.
 Refactor some functions.  They're too long.
+Check the program with a PEP8 style checker.
+

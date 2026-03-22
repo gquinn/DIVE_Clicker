@@ -1,16 +1,20 @@
 #
-# Auto clicks in the game at https://alexfink.github.io/dive/
+# Auto clicks the game at https://alexfink.github.io/dive/
 #
 
 from datetime import datetime
 import random
 import os
 
+#
+# Constantsdefined here.   Except that Python doesn't really do constants.
+#
 OPTIONS_FILE = "options.txt"
 
-SCORE_IMAGE_SIZE = 200
 
-    
+#
+#  Copyright message because (almost) everyone wants to see a copyright statement.
+#
 def copyright_message():
     print("""\n\n\nDIVE_Clicker.py  Copyright 2026  Gary Quinn
 
@@ -80,11 +84,16 @@ def send_keys(keys : str, score_panel_x : int, score_panel_y : int) -> None:
     no_change_count = 0
     start_score_colour = pyautogui.screenshot().getpixel((score_panel_x, score_panel_y))
 
+    # Click to activate the web page
     pyautogui.click(score_panel_x, score_panel_y)
-    
+
+    # F5 to refresh the page and restart the game
     pyautogui.keyDown("f5")
     pyautogui.keyUp("f5")
 
+    # Loop until the score stops changing.
+    # 3x the input string length seems optimum.
+    # 2x sometimes exits before the game is actually complete.
     while no_change_count < 3*len(keys):
         for key in keys:
 
@@ -110,6 +119,9 @@ def get_random_moves() -> str:
     return ''.join(random.choice(valid_keys) for i in range(random.randint(4, 12)))
 
 
+#
+# Read pre-defined and pre-entered key strings from the options file.
+#
 def read_options() -> dict:
 
     key_dict = {}
@@ -125,6 +137,9 @@ def read_options() -> dict:
     return key_dict
 
 
+#
+# Save any new key strings into the options file
+#
 def append_user_choice_to_options_file(options : str) -> None:
 
     if len(options) > 0:
@@ -132,6 +147,11 @@ def append_user_choice_to_options_file(options : str) -> None:
             fo.write(f"\n{options}")
                     
 
+#
+#  Play the game.
+#  x,y is the score's panel position (to find its colour)
+#  hx,hy is the high score's panel position (to find its colour)
+#
 def process_user_input(key_dict : dict, option : str, x : int, y : int, hx : int, hy : int) -> bool:
 
     if option in key_dict:
@@ -151,7 +171,7 @@ def process_user_input(key_dict : dict, option : str, x : int, y : int, hx : int
 
     if len(user_choice) == 0:
         print("Nothing to do.\n")
-        return False
+        return False #  exit the game on a zero length input.
 
     
     print(f"\n\nUsing {user_choice}")
@@ -171,6 +191,9 @@ def process_user_input(key_dict : dict, option : str, x : int, y : int, hx : int
     return True
 
 
+#
+# Get the user's input and interpret it.
+#
 def get_user_input(key_dict : dict):
 
     repeat_count = 1
@@ -185,7 +208,7 @@ def get_user_input(key_dict : dict):
 
     if len(option) == 0:
         print("Nothing to do.\n")
-        return False, False, False, 0
+        return "", 0,0, 0,0, False
 
     command = option.split(".")[0]
 
@@ -197,6 +220,7 @@ def get_user_input(key_dict : dict):
 
     except:
         repeat_count = 1
+        
 
     if command == "0":
         command = get_random_moves()
@@ -210,6 +234,9 @@ def get_user_input(key_dict : dict):
     return command, x, y, hx, hy, repeat_count
 
 
+#
+# main() because I'm a C programmer at heart.
+#
 def main() -> None:
 
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -233,7 +260,9 @@ def main() -> None:
                 return
 
 
-
+#
+# Python program starts here.
+#
 if __name__ == "__main__":
     
     install_modules(["pyautogui"])
