@@ -4,7 +4,6 @@
 
 from datetime import datetime
 import random
-import sys
 import os
 
 OPTIONS_FILE = "options.txt"
@@ -13,7 +12,7 @@ SCORE_IMAGE_SIZE = 200
 
     
 def copyright_message():
-    print("""DIVE_Clicker.py  Copyright 2026  Gary Quinn
+    print("""\n\n\nDIVE_Clicker.py  Copyright 2026  Gary Quinn
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,10 +24,27 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-along with this program.  If not, see <https://www.gnu.org/licenses/>.""")
+See <https://www.gnu.org/licenses/>.\n\n""")
 
 
-def install_modules(module_list):
+#
+# This function is for testing purposes only.
+#
+def test_function_get_score_positions() -> None:
+
+    input("\n\nHover the cursor over the score and press the enter key")
+    sx,sy = pyautogui.position()
+
+    input("\n\nHover the cursor over the high score and press the enter key")
+    hx,hy = pyautogui.position()
+
+    print(f"score pos {sx},{sy}   high score pos {hx},{hy}     diff {hx-sx},{hy-sy}")
+
+
+#
+# Dynamically install the requested python modules.
+#
+def install_modules(module_list : list) -> None:
 
     for module in module_list:
         print(f"Trying {module}")
@@ -42,14 +58,19 @@ def install_modules(module_list):
             print(f"Successfully imported {module}")
 
 
+#
+# Save a screenshot to "prove" the score that was obtained.
+#
+def get_score(filename : str) -> None:
 
-def get_score(filename, x, y, xsize, ysize):
-
-    image = pyautogui.screenshot(filename, region=(x-xsize//2, y-ysize//2, int(xsize*2.1), ysize))
-
+    image = pyautogui.screenshot()
+    image.save(filename)
 
 
-def send_keys(keys, score_x, score_y):
+#
+# Play through a single game of DIVE
+#
+def send_keys(keys : str, score_panel_x : int, score_panel_y : int) -> None:
 
     arrow_key_dict = {"W":"up",
                       "A":"left",
@@ -57,9 +78,9 @@ def send_keys(keys, score_x, score_y):
                       "S":"down"}
 
     no_change_count = 0
-    start_colour = pyautogui.screenshot().getpixel((score_x, score_y))
+    start_score_colour = pyautogui.screenshot().getpixel((score_panel_x, score_panel_y))
 
-    pyautogui.click(score_x, score_y)
+    pyautogui.click(score_panel_x, score_panel_y)
     
     pyautogui.keyDown("f5")
     pyautogui.keyUp("f5")
@@ -69,24 +90,27 @@ def send_keys(keys, score_x, score_y):
 
             pyautogui.keyDown(arrow_key_dict[key])
             pyautogui.keyUp(arrow_key_dict[key])
-            current_colour = pyautogui.screenshot().getpixel((score_x, score_y))
+            current_colour = pyautogui.screenshot().getpixel((score_panel_x, score_panel_y))
             
-            if start_colour != current_colour:
-                start_colour = current_colour
+            if start_score_colour != current_colour:
+                start_score_colour = current_colour
                 no_change_count = 0
             else:
                 no_change_count += 1
 
-            print(score_x, score_y, start_colour, key, arrow_key_dict[key], current_colour, no_change_count)
+            print(f"{key}, {arrow_key_dict[key]:6}, {str(start_score_colour):15} -> {str(current_colour):15}, {no_change_count:3} ({score_panel_x},{score_panel_y})")
 
 
-def get_random_moves():
+#
+# Generate a string of random moves
+#
+def get_random_moves() -> str:
 
     valid_keys = "WASD"
     return ''.join(random.choice(valid_keys) for i in range(random.randint(4, 12)))
 
 
-def read_options():
+def read_options() -> dict:
 
     key_dict = {}
 
@@ -101,14 +125,14 @@ def read_options():
     return key_dict
 
 
-def append_user_choice_to_options_file(options):
+def append_user_choice_to_options_file(options : str) -> None:
 
     if len(options) > 0:
         with open(OPTIONS_FILE, "a") as fo:
             fo.write(f"\n{options}")
                     
 
-def process_user_input(key_dict, option, x, y):
+def process_user_input(key_dict : dict, option : str, x : int, y : int, hx : int, hy : int) -> bool:
 
     if option in key_dict:
         user_choice = key_dict[option]
@@ -129,23 +153,29 @@ def process_user_input(key_dict, option, x, y):
         print("Nothing to do.\n")
         return False
 
-    print(f"Using {user_choice}")
+    
+    print(f"\n\nUsing {user_choice}")
 
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-    print(f"Current date & time : {current_datetime}\n\n")
+    print(f"Current date & time : {current_datetime}\n")
     
-    get_score(f"DIVE_{current_datetime}_score_at_start_{user_choice}.png", x, y, SCORE_IMAGE_SIZE, SCORE_IMAGE_SIZE)
-    send_keys(user_choice, x, y) # Send the user's choice
-    get_score(f"DIVE_{current_datetime}_score_at_end_{user_choice}.png", x, y, SCORE_IMAGE_SIZE, SCORE_IMAGE_SIZE)
+    high_score_colour = pyautogui.screenshot().getpixel((hx, hy))
+    
+    send_keys(user_choice, x, y) # Play a single game
+
+    # Take a screen shot if the high score has changed
+    new_high_score_colour = pyautogui.screenshot().getpixel((hx, hy))
+    if high_score_colour != new_high_score_colour:
+        get_score(f"DIVE_highscore_{current_datetime}_{user_choice}.png")
 
     return True
 
 
-def get_user_input(key_dict):
+def get_user_input(key_dict : dict):
 
     repeat_count = 1
 
-    print("ENTER: Exit\n0: Random\nSelection of LRUD: use those, OR...")
+    print("\n\nPress ENTER to Exit\nType a selection of WASD characters, OR...\n0 Random selection of WASD key presses")
     for key in key_dict:
         print(key, key_dict[key])
         
@@ -171,30 +201,34 @@ def get_user_input(key_dict):
     if command == "0":
         command = get_random_moves()
 
-    print("\n\nHover the cursor over the score and press the enter key")
-
-    input()
-
+    input("\n\nHover the cursor over the score and press the enter key : ")
     x,y = pyautogui.position()
 
-    return command, x, y, repeat_count
+    input("\n\nHover the cursor over the high score and press the enter key : ")
+    hx,hy = pyautogui.position()
+
+    return command, x, y, hx, hy, repeat_count
 
 
-def main():
+def main() -> None:
+
+    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+    get_score(f"DIVE_highscore_{current_datetime}_start_of_new_session.png")
+
 
     key_dict = read_options()
 
     run_again = True
     while run_again:
 
-        option, x, y, repeat_count = get_user_input(key_dict)
+        option, x, y, hx, hy, repeat_count = get_user_input(key_dict)
 
         if repeat_count == 0:
             return
 
         for i in range(repeat_count):
             print(f"\n\nRun {i+1} of {repeat_count}")
-            run_again = process_user_input(key_dict, option, x, y)
+            run_again = process_user_input(key_dict, option, x, y, hx, hy)
             if not run_again:
                 return
 
@@ -207,6 +241,8 @@ if __name__ == "__main__":
     import pyautogui
 
     copyright_message()
+
+    #test_function_get_score_positions()
     
     main()
 

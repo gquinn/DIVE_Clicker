@@ -18,8 +18,8 @@ AWDS has scored 1193
 16th March 2026 : AWDS scored 1729
 17th March 2026 : AWDS scored 2078
 18th March 2026 : AWDS scored 2080
-19th March 2026 : AWDS scored 2240
-20th March 2026 : AWDS scored 3347 - which beats my personal high score of 2139
+19th March 2026 : AWDS scored 2240 - which beats my personal high score of 2139
+20th March 2026 : AWDS scored 3347 
 
 Can you beat it?
 Can you find a sequence that does better?
